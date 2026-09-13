@@ -1,6 +1,8 @@
 # Sistema de Empleados
 
-Descripción del proyecto
+Sistema de gestión de empleados desarrollado en Python que permite registrar,
+consultar, editar y eliminar empleados mediante una aplicación de consola.
+Los datos se almacenan localmente utilizando JSON.
 
 ## Funcionalidades
 - Registrar empleados
@@ -16,4 +18,6 @@ Descripción del proyecto
 - GitHub
 
 ## Ejecución
+```bash
 python main.py
+```
