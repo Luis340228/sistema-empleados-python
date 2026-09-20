@@ -1,11 +1,16 @@
 def mostrar_empleado(empleado):
+    bono, salario_con_bono = calcular_bono(
+        empleado["salario"],
+        empleado["antiguedad"]
+    )
+
     print(f"ID: {empleado['id']}")
     print(f"Nombre: {empleado['nombre']}")
     print(f"Puesto: {empleado['puesto']}")
     print(f"Salario: ${empleado['salario']:.2f}")
     print(f"Antiguedad: {empleado['antiguedad']}")
-    print(f"Bono: ${empleado['bono']:.2f}")
-    print(f"Salario + bono: ${empleado['salario_con_bono']:.2f}")
+    print(f"Bono: ${bono:.2f}")
+    print(f"Salario + bono: ${salario_con_bono:.2f}")
 
 def mostrar_empleados(lista_empleados):
     print("\n--- LISTA DE EMPLEADOS ---")
@@ -18,27 +23,14 @@ def mostrar_empleados(lista_empleados):
         mostrar_empleado(empleado)
         print("-" * 30)
 
-def buscar_empleado(lista_empleados):
+def solicitar_nombre_busqueda():
     print("\n--- BUSCAR EMPLEADO ---")
 
-    if not lista_empleados:
-        print("No hay empleados registrados.")
-        return
+    nombre_buscar = input(
+        "Nombre del empleado a buscar: "
+    ).strip()
 
-    nombre_buscar = input("Nombre del empleado a buscar: ").strip()
-
-    encontrado = False
-
-    for empleado in lista_empleados:
-        if nombre_buscar.lower() in empleado["nombre"].lower():
-            print("\nEmpleado encontrado:")
-            mostrar_empleado(empleado)
-
-            encontrado = True
-            break
-
-    if not encontrado:
-        print("Empleado no encontrado.")
+    return nombre_buscar
 
 def calcular_bono(salario, antiguedad):
     if antiguedad < 2:
@@ -53,7 +45,7 @@ def calcular_bono(salario, antiguedad):
 
     return bono, salario_con_bono
 
-def registrar_empleado(id_empleado):
+def registrar_empleado():
     print("\n--- REGISTRAR EMPLEADO ---")
 
     while True:
@@ -97,129 +89,85 @@ def registrar_empleado(id_empleado):
         except ValueError:
             print("Error: escribe un número entero")
 
-    bono, salario_con_bono = calcular_bono(salario, antiguedad)
+    return nombre, puesto, salario, antiguedad
 
-    empleado = {
-        "id" : id_empleado,
-        "nombre": nombre,
-        "puesto": puesto,
-        "salario": salario,
-        "antiguedad": antiguedad,
-        "bono": bono,
-        "salario_con_bono": salario_con_bono
-    }
-
-    return empleado
-
-def editar_empleado(lista_empleados):
+def editar_empleado(empleado):
     print("\n--- EDITAR EMPLEADO---")
 
-    if not lista_empleados:
-        print("No hay empleados registrados.")
-        return
+    print("\nDeja vacío el dato que no quieras modificar.")
+
+    nuevo_nombre = input(
+        f"Nombre [{empleado['nombre']}]: "
+    ).strip()
+
+    if nuevo_nombre == "":
+        nuevo_nombre = empleado["nombre"]
+
+    nuevo_puesto = input(
+        f"Puesto [{empleado['puesto']}]: "
+    ).strip()
+
+    if nuevo_puesto == "":
+        nuevo_puesto = empleado["puesto"]
 
     while True:
-        try:
-            id_buscar = int(input("ID del empleado a editar: "))
+        nuevo_salario = input(
+            f"Salario [{empleado['salario']}]: "
+        ).strip()
+
+        if nuevo_salario == "":
+            nuevo_salario = empleado["salario"]
             break
+
+        try:
+            nuevo_salario = float(nuevo_salario)
+
+            if nuevo_salario <= 0:
+                print("El salario debe ser mayor a 0.")
+                continue
+
+            break
+
         except ValueError:
-            print("Debes escribir un ID valido")
+            print("Debes escribir un salario válido.")
 
-    for empleado in lista_empleados:
-        if empleado["id"] == id_buscar:
-            print("\nEmpleado encontrado:")
-            mostrar_empleado(empleado)
+    while True:
+        nueva_antiguedad = input(
+            f"Antiguedad [{empleado['antiguedad']}]: "
+        ).strip()
 
-            print("\nDeja vacío el dato que no quieras modificar.")
+        if nueva_antiguedad == "":
+            nueva_antiguedad = empleado["antiguedad"]
+            break
 
-            nuevo_nombre = input(
-                f"Nombre [{empleado['nombre']}]: "
-            ).strip()
+        try:
+            nueva_antiguedad = int(nueva_antiguedad)
 
-            if nuevo_nombre != "":
-                empleado["nombre"] = nuevo_nombre
+            if nueva_antiguedad < 0:
+                print("La antiguedad debe ser mayor a 0.")
+                continue
 
-            nuevo_puesto = input(
-                f"Puesto [{empleado['puesto']}]: "
-            ).strip()
+            break
 
-            if nuevo_puesto != "":
-                empleado["puesto"] = nuevo_puesto
+        except ValueError:
+            print("Debes escribir una antiguedad válida.")
 
-            nuevo_salario = input(
-                f"Salario [{empleado['salario']}]: "
-            ).strip()
+    return (
+        nuevo_nombre,
+        nuevo_puesto,
+        nuevo_salario,
+        nueva_antiguedad,
+    )
 
-            if nuevo_salario != "":
-                try:
-                    nuevo_salario = float(nuevo_salario)
-
-                    if nuevo_salario > 0:
-                        empleado["salario"] = nuevo_salario
-                    else:
-                        print("El salario debe ser mayor a 0.")
-
-                except ValueError:
-                    print("El salario no fue modificado porque no es válido.")
-
-            nueva_antiguedad = input(
-                f"Antiguedad [{empleado['antiguedad']}]: "
-            ).strip()
-
-            if nueva_antiguedad != "":
-                try:
-                    nueva_antiguedad = int(nueva_antiguedad)
-
-                    if nueva_antiguedad >= 0:
-                        empleado["antiguedad"] = nueva_antiguedad
-                    else:
-                        print("La antiguedad no puede ser negativa.")
-
-                except ValueError:
-                    print("La antiguedad no puede ser modificada porque no es valida.")
-
-            bono, salario_con_bono = calcular_bono(
-                empleado["salario"],
-                empleado["antiguedad"]
-            )
-
-            empleado["bono"] = bono
-            empleado["salario_con_bono"] = salario_con_bono
-
-            print("\nEmpleado actualizado:")
-            mostrar_empleado(empleado)
-
-            return
-
-    print("No existe un empleado con ese ID.")
-
-def eliminar_empleado(lista_empleados):
+def solicitar_id_eliminar():
     print("\n--- ELIMINAR EMPLEADO---")
 
-    if not lista_empleados:
-        print("No hay empleados registrados.")
-        return
-
     while True:
         try:
-            id_buscar = int(input("ID del empleado a eliminar: "))
-            break
+            id_empleado = int(
+                input("ID del empleado a eliminar: ")
+            )
+            return id_empleado
+
         except ValueError:
-            print("Debes escribir un ID valido.")
-
-    for empleado in lista_empleados:
-        if empleado["id"] == id_buscar:
-            print("\nEmpleado encontrado:")
-            mostrar_empleado(empleado)
-
-            confirmar = input("¿Deseas eliminar este empleado? (s/n): ").strip().lower()
-
-            if confirmar == "s":
-                lista_empleados.remove(empleado)
-                print("Empleado eliminado correctamente.")
-            else:
-                print("Operación cancelada.")
-
-            return
-
-    print("No existe un empleado con ese ID.")
+            print("Debes escribir un ID valido")
