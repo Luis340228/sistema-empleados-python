@@ -1,23 +1,24 @@
 from empleados import (
     registrar_empleado,
     mostrar_empleados,
-    buscar_empleado,
     editar_empleado,
-    eliminar_empleado,
+    solicitar_id_eliminar,
+    solicitar_nombre_busqueda,
 )
 
-from almacenamiento import (
-    cargar_empleados,
-    guardar_empleados,
+from base_datos import (
+    crear_base_datos,
+    insertar_empleado,
+    obtener_empleados,
+    buscar_empleados_por_nombre,
+    obtener_empleado_por_id,
+    eliminar_empleado_db, actualizar_empleado,
 )
+
+from empleados import mostrar_empleado
 
 def main():
-    empleados = cargar_empleados()
-
-    if empleados:
-        siguiente_id = max(empleado["id"] for empleado in empleados) + 1
-    else:
-        siguiente_id = 1
+    crear_base_datos()
 
     while True:
         print("\n" + "=" * 35)
@@ -34,25 +35,90 @@ def main():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            nuevo_empleado = registrar_empleado(siguiente_id)
-            empleados.append(nuevo_empleado)
-            siguiente_id += 1
+            nombre, puesto, salario, antiguedad = registrar_empleado()
 
-            guardar_empleados(empleados)
+            insertar_empleado(
+                nombre,
+                puesto,
+                salario,
+                antiguedad
+            )
+
+            print("Empleado registrado correctamente.")
 
         elif opcion == "2":
+            empleados = obtener_empleados()
             mostrar_empleados(empleados)
 
         elif opcion == "3":
-            buscar_empleado(empleados)
+            nombre_buscar = solicitar_nombre_busqueda()
+
+            empleados_encontrados = buscar_empleados_por_nombre(
+                nombre_buscar
+            )
+
+            if empleados_encontrados:
+                mostrar_empleados(empleados_encontrados)
+            else:
+                print("Empleado no encontrado.")
 
         elif opcion == "4":
-            editar_empleado(empleados)
-            guardar_empleados(empleados)
+            while True:
+                try:
+                    id_empleado = int(
+                        input("ID del empleado a editar: ")
+                    )
+                    break
+                except ValueError:
+                    print("Debes escribir un ID válido.")
+
+            empleado = obtener_empleado_por_id(id_empleado)
+
+            if empleado is None:
+                print("No existe un empleado con ese ID.")
+                continue
+
+            print("\nEmpleado encontrado:")
+            mostrar_empleado(empleado)
+
+            nombre, puesto, salario, antiguedad = editar_empleado(
+                empleado
+            )
+
+            actualizar_empleado(
+                id_empleado,
+                nombre,
+                puesto,
+                salario,
+                antiguedad
+            )
+
+            print("\nEmpleado actualizado correctamente.")
+
+            empleado_actualizado = obtener_empleado_por_id(id_empleado)
+            mostrar_empleado(empleado_actualizado)
 
         elif opcion == "5":
-            eliminar_empleado(empleados)
-            guardar_empleados(empleados)
+            id_empleado = solicitar_id_eliminar()
+
+            empleado = obtener_empleado_por_id(id_empleado)
+
+            if empleado is None:
+                print("No existe un empleado con ese ID.")
+                continue
+
+            print("\nEmpleado encontrado:")
+            mostrar_empleado(empleado)
+
+            confirmar = input(
+                "¿Deseas eliminar este empleado? (s/n): "
+            ).strip().lower()
+
+            if confirmar == "s":
+                eliminar_empleado_db(id_empleado)
+                print("Empleado eliminado correctamente.")
+            else:
+                print("Operación cancelada.")
 
         elif opcion == "6":
             print("\n--- CERRANDO PROGRAMA ---")
